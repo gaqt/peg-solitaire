@@ -20,6 +20,8 @@ struct InitialState : public AppState {
     struct M {
         Board board;
         bool startPressed;
+        bool resetPressed;
+        bool solvedPressed;
     } m;
 
     static std::unique_ptr<InitialState> Create();

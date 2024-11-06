@@ -12,7 +12,7 @@ using namespace std;
 
 unique_ptr<InitialState> InitialState::Create() {
     return unique_ptr<InitialState>(
-        new InitialState(M{.board = InitialBoard(), .startPressed = false}));
+        new InitialState(M{.board = InitialBoard(), .startPressed = false, .resetPressed = false, .solvedPressed = false}));
 }
 
 unique_ptr<InitialState> InitialState::Create(Board board) {
@@ -24,6 +24,12 @@ unique_ptr<AppState> InitialState::Run() {
     if (m.startPressed)
         return LoadingState::Create(m.board);
 
+    if (m.resetPressed)
+        m.board = InitialBoard();
+
+    if (m.solvedPressed)
+        m.board = SolvedBoard(17);
+
     m.board.HandleClicks();
 
     BeginDrawing();
@@ -31,6 +37,10 @@ unique_ptr<AppState> InitialState::Run() {
     m.board.Show();
     m.startPressed = GuiButton(
         {(float)WIDTH / 2 - 50, (float)HEIGHT - 100, 100, 40}, "Start");
+    m.resetPressed = GuiButton(
+        {(float)WIDTH / 2 - 250, (float)HEIGHT - 100, 100, 40}, "Reset");
+    m.solvedPressed = GuiButton(
+        {(float)WIDTH / 2 + 150, (float)HEIGHT - 100, 100, 40}, "Solved");
     EndDrawing();
 
     return nullptr;
