@@ -94,8 +94,7 @@ cleanup:
 
 Solver *Solver::Create(Board initialBoard, Board finalBoard,
                        uint32_t maxSolutions) {
-    uint8_t pathCnt = 1u + __builtin_popcountll(initialBoard.bytes) -
-                      __builtin_popcountll(finalBoard.bytes);
+    uint8_t pathCnt = max(0, 1 + initialBoard.Diff(finalBoard));
     return new Solver(M{
         .middleStates = {},
         .verified = {},
@@ -117,7 +116,7 @@ void Solver::Solve(bool multithreaded) {
     printf("pathCnt: %d\n", m.pathCnt);
 #endif
 
-    if (m.initialBoard.bytes == 0 || m.finalBoard.bytes == 0)
+    if (m.initialBoard.bytes == 0ll || m.finalBoard.bytes == 0ll)
         goto cleanup;
 
     if (m.pathCnt == 1) {

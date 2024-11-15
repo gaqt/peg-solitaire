@@ -1,6 +1,7 @@
 #include "board.hpp"
 #include "appstate.hpp"
 #include <cstdint>
+#include <cstdio>
 #include <functional>
 #include <raylib.h>
 
@@ -127,9 +128,6 @@ Board Board::MoveRev(int x, int y, MoveDirection dir) const {
     return cloned;
 }
 
-const Board SolvedBoard(int x) { return Board{1ull << x}; }
-bool Board::IsSolved() const { return __builtin_popcount(bytes) == 1; }
-
 constexpr inline Vector2 CirclePos(float x, float y) {
     return {PADDING + GAP * x, PADDING + GAP * y};
 }
@@ -153,10 +151,10 @@ void Board::Show() const {
             }
 
 #ifdef DEBUG
-            if (Get(x,y)) {
-                DrawText("1", CirclePos(x,y).x, CirclePos(x,y).y, 20, BLACK);
+            if (Get(x, y)) {
+                DrawText("1", CirclePos(x, y).x, CirclePos(x, y).y, 20, BLACK);
             } else {
-                DrawText("0", CirclePos(x,y).x, CirclePos(x,y).y, 20, GREEN);
+                DrawText("0", CirclePos(x, y).x, CirclePos(x, y).y, 20, GREEN);
             }
 #endif
         }
@@ -183,28 +181,17 @@ void Board::HandleClicks() {
     }
 }
 
-const uint8_t initialBoard[BOARD_SIZE + 4][BOARD_SIZE + 4] = {
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0}, {0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0},
-    {0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0}, {0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0},
-    {0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0}, {0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0},
-    {0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
-
 bool Board::operator==(const Board &other) const {
     return this->bytes == other.bytes;
 }
 
-const Board InitialBoard() {
-    uint64_t bytes = 0;
+Board InitialBoard() { return {(~((1ull) << 17)) & ((1ull << 34) - 1ull)}; }
 
-    for (int y = 2; y < BOARD_SIZE + 2; y++) {
-        for (int x = 2; x < BOARD_SIZE + 2; x++) {
-            bytes |= (initialBoard[x][y] << posTable[x][y]);
-        }
-    }
+Board FinalBoard() { return {((1ull) << 17) ^ 1ull}; }
 
-    return {bytes};
+int8_t Board::Diff(const Board other) {
+    return __builtin_popcountll(this->bytes) -
+           __builtin_popcountll(other.bytes);
 }
 
 size_t BoardHasher::operator()(const Board board) const {

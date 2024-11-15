@@ -19,9 +19,9 @@ struct Board {
     void Flip(const int x, const int y);
     Board Move(const int x, const int y, const MoveDirection dir) const;
     Board MoveRev(const int x, const int y, const MoveDirection dir) const;
-    bool IsSolved() const;
     void Show() const;
     void HandleClicks();
+    int8_t Diff(const Board other);
 
     bool operator==(const Board &other) const;
 };
@@ -34,5 +34,5 @@ struct BoardCompare {
     bool operator()(const Board a, const Board b) const;
 };
 
-const Board InitialBoard();
-const Board SolvedBoard(int x);
+Board InitialBoard();
+Board FinalBoard();

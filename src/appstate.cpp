@@ -12,7 +12,10 @@ using namespace std;
 
 unique_ptr<InitialState> InitialState::Create() {
     return unique_ptr<InitialState>(
-        new InitialState(M{.board = InitialBoard(), .startPressed = false, .resetPressed = false, .solvedPressed = false}));
+        new InitialState(M{.board = InitialBoard(),
+                           .startPressed = false,
+                           .resetPressed = false,
+                           .solvedPressed = false}));
 }
 
 unique_ptr<InitialState> InitialState::Create(Board board) {
@@ -28,7 +31,7 @@ unique_ptr<AppState> InitialState::Run() {
         m.board = InitialBoard();
 
     if (m.solvedPressed)
-        m.board = SolvedBoard(17);
+        m.board = FinalBoard();
 
     m.board.HandleClicks();
 
@@ -97,20 +100,21 @@ unique_ptr<ShowState> ShowState::Create(vector<vector<Board>> solutions) {
 }
 
 unique_ptr<AppState> ShowState::Run() {
-    if (m.solutions.size() == 0) {
-        BeginDrawing();
-        ClearBackground(BLACK);
-        DrawText("No Solutions Found", WIDTH / 2 - 90, HEIGHT / 2 - 10, 20,
-                 GREEN);
-        EndDrawing();
-        return nullptr;
-    }
-
     if (m.backPressed) {
         if (m.solutions.size() == 0)
             return InitialState::Create();
         else
             return InitialState::Create(m.solutions[0].back());
+    }
+
+    if (m.solutions.size() == 0) {
+        BeginDrawing();
+        ClearBackground(BLACK);
+        DrawText("No Solutions Found", WIDTH / 2 - 90, HEIGHT / 2 - 10, 20,
+                 GREEN);
+        m.backPressed = GuiButton({50, HEIGHT - 100, 100, 40}, "Back");
+        EndDrawing();
+        return nullptr;
     }
 
     char textSelected[80];
@@ -134,7 +138,7 @@ unique_ptr<AppState> ShowState::Run() {
               m.solutions.size() - 0.9f);
     GuiSlider({350, HEIGHT - 170, 200, 20}, "1", textMaxStep, &m.step, 0,
               m.solutions[(int)m.selected].size() - 0.9f);
-    m.backPressed = GuiButton({50, HEIGHT-100, 100, 40}, "Back");
+    m.backPressed = GuiButton({50, HEIGHT - 100, 100, 40}, "Back");
     EndDrawing();
 
     return nullptr;
